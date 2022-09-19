@@ -2,7 +2,7 @@ import React from "react";
 
 const Button = ({ className, type, onClick, icon, label }) => {
   return (
-    <Button
+    <button
       className={`border py-2 rounded text-[14px] leading-6 flex justify-center items-center  ${
         className ?? ""
       }`}
@@ -11,7 +11,7 @@ const Button = ({ className, type, onClick, icon, label }) => {
     >
       {icon}
       {label}
-    </Button>
+    </button>
   );
 };
 

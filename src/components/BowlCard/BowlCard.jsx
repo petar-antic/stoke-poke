@@ -1,15 +1,27 @@
 import React from "react";
-import { Field } from "formik";
 
-const axios = require("axios");
-
-export const BowlCard = ({ field, id, title, description, imagePath }) => {
+export const BowlCard = ({
+  field,
+  id,
+  title,
+  description,
+  imagePath,
+  setBillData,
+  data,
+}) => {
   let publicURL = "https://fet.app.fsd.rs";
 
   return (
     <li className="bowl-card w-1/4">
       <input {...field} className="peer hidden" type="radio" id={id} />
       <label
+        onClick={() => {
+          setBillData(() => ({
+            ...data,
+            bowlId: id.toString(),
+            bowlName: title,
+          }));
+        }}
         htmlFor={id}
         className="flex flex-col px-5 pb-5 pt-2.5 w-full cursor-pointer
         border border-[#E9E8F8] peer-checked:border-[#F86060]"

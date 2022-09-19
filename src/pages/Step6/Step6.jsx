@@ -1,14 +1,27 @@
-import { Form, Formik } from "formik";
+import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import Bill from "../../components/Bill/Bill";
 import { ExtraIngredientCard } from "../../components/ExtraIngredientCard/ExtraIngredientCard";
-import Footer from "../../components/Footer/Footer";
+import { useNavigate, useLocation } from "react-router-dom";
+import { addOrder } from "../../redux/features/cart/cartSlice";
+import { useDispatch } from "react-redux";
 
 const axios = require("axios");
 
 export const Step6 = () => {
   let token = process.env.REACT_APP_API_TOKEN;
   const [extraIngredients, setExtraIngredients] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+
+  const orderState = location.state.values;
+
+  const [billData, setBillData] = useState(location.state.billData);
+  const order = {};
+
+  console.log(billData);
 
   const getExtraIngredients = async () => {
     const { data } = await axios.get(
@@ -29,7 +42,22 @@ export const Step6 = () => {
     getExtraIngredients();
   }, []);
 
-  console.log(extraIngredients);
+  const selectIngredient = (extraIngredient) => {
+    setSelectedIngredients([...selectedIngredients, extraIngredient]);
+    setBillData({
+      ...billData,
+      extraIngredients: selectedIngredients,
+    });
+  };
+
+  // const backPageHandler = () => {
+  //   navigate(`/step5`);
+  // };
+
+  const goToCheckout = (order) => {
+    // dispatch(addToCart(order));
+    // navigate(`/checkout`);
+  };
 
   return (
     <>
@@ -45,35 +73,46 @@ export const Step6 = () => {
           </p>
 
           <Formik
+            // validationSchema={validationSchema}
             initialValues={{
-              extraIngredients: [],
+              ...orderState,
             }}
-            onSubmit={async (values) => {
-              alert(JSON.stringify(values, null, 2));
+            onSubmit={(values) => {
+              dispatch(addOrder(values));
+              // navigate(`/`);
             }}
           >
-            {({ values }) => (
+            {({ onChange, values }) => (
               <Form>
-                {console.log(values)}
                 <ul className="flex flex-col gap-y-5 mt-10">
                   {extraIngredients.map((extraIngredient) => {
                     return (
-                      <ExtraIngredientCard
+                      <Field
                         key={extraIngredient.id}
+                        name="extraIngredients"
+                        value={extraIngredient.id.toString()}
+                        component={ExtraIngredientCard}
+                        onChange={onChange}
                         id={extraIngredient.id}
-                        name={extraIngredient.name}
+                        title={extraIngredient.name}
                         price={extraIngredient.price}
                         currency={extraIngredient.currency}
+                        orderState={orderState}
+                        goToCheckout={goToCheckout}
+                        setBillData={() => selectIngredient(extraIngredient)}
                       />
                     );
                   })}
                 </ul>
-                <Footer />
+                <Bill
+                  orderState={values}
+                  billData={billData}
+                  extraIngredients={selectedIngredients}
+                />
               </Form>
             )}
           </Formik>
         </div>
-        <Bill />
       </div>
     </>
   );

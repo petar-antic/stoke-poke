@@ -1,3 +1,4 @@
+import React from "react";
 import "./App.css";
 import { Layout } from "./layout/layout";
 import { Routes, Route } from "react-router-dom";
@@ -7,6 +8,7 @@ import { Step3 } from "./pages/Step3/Step3";
 import { Step4 } from "./pages/Step4/Step4";
 import { Step5 } from "./pages/Step5/Step5";
 import { Step6 } from "./pages/Step6/Step6";
+import { CartOverview } from "./pages/CartOverview/CartOverview";
 
 const App = () => {
   return (
@@ -19,6 +21,7 @@ const App = () => {
           <Route path="/step4" element={<Step4 />} />
           <Route path="/step5" element={<Step5 />} />
           <Route path="/step6" element={<Step6 />} />
+          <Route path="/cart-overview" element={<CartOverview />} />
         </Routes>
       </Layout>
     </>

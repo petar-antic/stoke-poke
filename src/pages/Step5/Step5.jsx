@@ -1,34 +1,22 @@
-import { Form, Formik } from "formik";
+import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { Checkbox } from "../../components/Atoms/Checkbox";
 import Footer from "../../components/Footer/Footer";
 import { Warning } from "../../components/Warning/Warning";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const axios = require("axios");
 
 export const Step5 = () => {
   let token = process.env.REACT_APP_API_TOKEN;
+  const navigate = useNavigate();
+  const location = useLocation();
   const [ingredients, setIngredients] = useState([]);
-  const maxIngredients = 8;
-  const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [showMaxWarning, setShowMaxWarning] = useState(false);
-
-  // console.log(selectedIngredients);
-  // console.log(selectedIngredients.length);
-  // console.log(showMaxWarning);
-
-  const selectIngredient = (ingredient) => {
-    if (selectedIngredients.lenght >= maxIngredients) {
-      setShowMaxWarning(true);
-    }
-  };
-
-  const unselectIngredient = (ingredient) => {
-    // ovo je objekat koji predstavlja ingredient {id: 1, name: 'pasulj'}
-    if (selectedIngredients.lenght < maxIngredients) {
-      setShowMaxWarning(false);
-    }
-  };
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [active, setActive] = useState(false);
+  const [billData, setBillData] = useState(location.state.billData);
+  const maxIngredients = billData.maxIngredients;
 
   const getIngredients = async () => {
     const { data } = await axios.get(
@@ -37,17 +25,30 @@ export const Step5 = () => {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
-    setIngredients(
-      data.data.map((ingredient) => ({
-        ...ingredient,
-        selected: false,
-      }))
-    );
+    setIngredients(data.data);
   };
 
   useEffect(() => {
     getIngredients();
   }, []);
+
+  const backPageHandler = () => {
+    navigate(`/step4`);
+  };
+
+  const selectIngredient = (ingredient) => {
+    setSelectedIngredients([...selectedIngredients, ingredient]);
+    setBillData({
+      ...billData,
+      ingredients: selectedIngredients,
+    });
+    if (selectedIngredients.length >= maxIngredients) {
+      setShowMaxWarning(true);
+      setActive(true);
+    }
+  };
+
+  console.log(selectedIngredients);
 
   return (
     <>
@@ -62,30 +63,34 @@ export const Step5 = () => {
       </p>
 
       <Formik
-        initialValues={{
-          ingredientId: [],
-        }}
-        onSubmit={async (values) => {
-          alert(JSON.stringify(values, null, 2));
+        // validationSchema={validationSchema}
+        initialValues={billData}
+        onSubmit={(values) => {
+          navigate(`/step6`, { state: { billData } });
         }}
       >
         {({ values }) => (
-          <Form onChange={() => console.log(values)}>
-            {console.log("pera", values)}
+          <Form>
             <ul className="grid grid-cols-4 gap-x-6 gap-y-5 mt-10">
               {ingredients.map((ingredient) => {
                 return (
-                  <Checkbox
+                  <Field
                     key={ingredient.id}
+                    name="ingredients"
+                    value={ingredient.id}
+                    component={Checkbox}
                     id={ingredient.id}
-                    name={ingredient.name}
-                    selectIngredient={selectIngredient}
+                    title={ingredient.name}
+                    setBillData={() => selectIngredient(ingredient)}
+                    disabled={active}
                   />
                 );
               })}
             </ul>
-            {showMaxWarning && <Warning sizeName="medium" />}
-            <Footer />
+            {showMaxWarning && (
+              <Warning sizeName={maxIngredients} className="mt-[32px]" />
+            )}
+            <Footer backPageHandler={backPageHandler} />
           </Form>
         )}
       </Formik>

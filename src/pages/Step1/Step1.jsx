@@ -1,20 +1,30 @@
 import React, { useEffect, useState } from "react";
 import * as yup from "yup";
 import { BowlCard } from "../../components/BowlCard/BowlCard";
-import Footer from "../../components/Footer/Footer";
 import { Formik, Form, Field } from "formik";
 import { useNavigate } from "react-router-dom";
+import Footer from "../../components/Footer/Footer";
 
 const axios = require("axios");
 
 export const Step1 = () => {
   let token = process.env.REACT_APP_API_TOKEN;
+  const initialValues = {
+    ingredients: [],
+    extraIngredients: [],
+  };
   const [bowls, setBowls] = useState([]);
+  const [billData, setBillData] = useState(initialValues);
   let navigate = useNavigate();
 
-  const validationSchema = yup.object({
-    bowl: yup.string().required("Required"),
-  });
+  // const validationSchema = yup.object({
+  //   bowlId: yup.string().required("Required"),
+  //   sizeId: "",
+  //   baseId: "",
+  //   sauceId: "",
+  //   ingredients: [],
+  //   extraIngredients: [],
+  // });
 
   const getBowls = async () => {
     const { data } = await axios.get(
@@ -30,10 +40,6 @@ export const Step1 = () => {
     getBowls();
   }, []);
 
-  const nextPageHandler = () => {
-    navigate(`/pick-size`);
-  };
-
   return (
     <>
       <h1 className="text-[32px] leading-[42px]">Make your own poke bowl</h1>
@@ -44,20 +50,14 @@ export const Step1 = () => {
       </p>
 
       <Formik
-        validationSchema={validationSchema}
-        initialValues={{
-          bowlId: "",
-          sizeId: "",
-          baseId: "",
-          sauceId: "",
-          ingredients: [],
-          extraIngredients: [],
+        // validationSchema={validationSchema}
+        initialValues={initialValues}
+        onSubmit={(values) => {
+          navigate(`/step2`, { state: { billData } });
         }}
-        onSubmit={() => {}}
       >
-        {({ values, errors, touched }) => (
+        {({ values }) => (
           <Form>
-            {console.log(values)}
             <ul className="flex flex-row gap-x-6 mt-10 " role="group">
               {bowls.map((bowl) => {
                 return (
@@ -66,16 +66,19 @@ export const Step1 = () => {
                     type="radio"
                     value={bowl.id.toString()}
                     component={BowlCard}
+                    key={bowl.id}
                     id={bowl.id}
                     title={bowl.name}
                     description={bowl.description}
                     imagePath={bowl.imagePath}
+                    setBillData={setBillData}
+                    data={billData}
                   />
                 );
               })}
             </ul>
             {/* {errors.bowl && touched.bowl ? <div>{errors.bowl}</div> : null} */}
-            <Footer />
+            <Footer noBack />
           </Form>
         )}
       </Formik>

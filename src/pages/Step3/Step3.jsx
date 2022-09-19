@@ -1,13 +1,27 @@
-import { Form, Formik } from "formik";
+import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { BaseCard } from "../../components/BaseCard/BaseCard";
 import Footer from "../../components/Footer/Footer";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const axios = require("axios");
 
 export const Step3 = () => {
   let token = process.env.REACT_APP_API_TOKEN;
   const [bases, setBases] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [billData, setBillData] = useState(location.state.billData);
+
+  // const validationSchema = yup.object({
+  //   bowlId: yup.string().required("Required"),
+  //   sizeId: "",
+  //   baseId: "",
+  //   sauceId: "",
+  //   ingredients: [],
+  //   extraIngredients: [],
+  // });
 
   const getBases = async () => {
     const { data } = await axios.get(
@@ -16,17 +30,16 @@ export const Step3 = () => {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
-    setBases(
-      data.data.map((base) => ({
-        ...base,
-        selected: false,
-      }))
-    );
+    setBases(data.data);
   };
 
   useEffect(() => {
     getBases();
   }, []);
+
+  const backPageHandler = () => {
+    navigate(`/step2`);
+  };
 
   return (
     <>
@@ -37,31 +50,34 @@ export const Step3 = () => {
       </p>
 
       <Formik
-        initialValues={{
-          baseId: "",
-        }}
-        onSubmit={async (values) => {
-          alert(JSON.stringify(values, null, 2));
+        // validationSchema={validationSchema}
+        initialValues={billData}
+        onSubmit={(values) => {
+          navigate(`/step4`, { state: { billData } });
         }}
       >
         {({ values }) => (
           <Form>
-            {console.log(values)}
-            <ul className="flex flex-row gap-x-6 mt-10">
+            <ul className="flex flex-row gap-x-6 mt-10" role="group">
               {bases.map((base) => {
                 return (
-                  <BaseCard
+                  <Field
+                    name="baseId"
+                    type="radio"
+                    value={base.id.toString()}
+                    component={BaseCard}
                     key={base.id}
                     id={base.id}
-                    imagePath={base.imagePath}
-                    name={base.name}
+                    title={base.name}
                     description={base.description}
-                    selected={base.selected}
+                    imagePath={base.imagePath}
+                    setBillData={setBillData}
+                    data={billData}
                   />
                 );
               })}
             </ul>
-            <Footer />
+            <Footer backPageHandler={backPageHandler} />
           </Form>
         )}
       </Formik>

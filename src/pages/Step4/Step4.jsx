@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from "react";
 import Footer from "../../components/Footer/Footer";
-import { SaouceCard } from "../../components/SauceCard/SauceCard";
-import { Form, Formik } from "formik";
+import { SauceCard } from "../../components/SauceCard/SauceCard";
+import { Field, Form, Formik } from "formik";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const axios = require("axios");
 
 export const Step4 = () => {
   let token = process.env.REACT_APP_API_TOKEN;
   const [sauces, setSauces] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [billData, setBillData] = useState(location.state.billData);
+
+  // const validationSchema = yup.object({
+  //   bowlId: yup.string().required("Required"),
+  //   sizeId: "",
+  //   baseId: "",
+  //   sauceId: "",
+  //   ingredients: [],
+  //   extraIngredients: [],
+  // });
 
   const getSauces = async () => {
     const { data } = await axios.get(
@@ -16,17 +30,16 @@ export const Step4 = () => {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
-    setSauces(
-      data.data.map((sauce) => ({
-        ...sauce,
-        selected: false,
-      }))
-    );
+    setSauces(data.data);
   };
 
   useEffect(() => {
     getSauces();
   }, []);
+
+  const backPageHandler = () => {
+    navigate(`/step3`);
+  };
 
   return (
     <>
@@ -38,30 +51,34 @@ export const Step4 = () => {
       </p>
 
       <Formik
-        initialValues={{
-          sauceId: "",
-        }}
-        onSubmit={async (values) => {
-          alert(JSON.stringify(values, null, 2));
+        // validationSchema={validationSchema}
+        initialValues={billData}
+        onSubmit={(values) => {
+          navigate(`/step5`, { state: { billData } });
         }}
       >
-        {({ values }) => (
+        {() => (
           <Form>
-            {console.log(values)}
             <ul className="grid grid-cols-2 gap-x-6 gap-y-5 mt-10">
               {sauces.map((sauce) => {
                 return (
-                  <SaouceCard
+                  <Field
+                    name="sauceId"
+                    type="radio"
+                    value={sauce.id.toString()}
+                    component={SauceCard}
                     key={sauce.id}
                     id={sauce.id}
-                    name={sauce.name}
+                    title={sauce.name}
                     description={sauce.description}
                     selected={sauce.selected}
+                    setBillData={setBillData}
+                    data={billData}
                   />
                 );
               })}
             </ul>
-            <Footer />
+            <Footer backPageHandler={backPageHandler} />
           </Form>
         )}
       </Formik>

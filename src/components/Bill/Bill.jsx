@@ -1,32 +1,29 @@
 import React from "react";
 import Button from "../Atoms/Button";
 
-const Bill = () => {
+const Bill = ({ billData, extraIngredients }) => {
   return (
     <div className="bill flex flex-col px-5 pt-[32px] pb-6 border border-[#E9E8F8] bg-white">
-      <div className="flex flex-row gap-x-[90px] text-[#292838]">
+      <div className="flex flex-row gap-x-[90px] text-[#292838] justify-between">
         <div className="leftSide flex flex-col gap-y-3 text-[16px] leading-[24px]">
           <h1 className="mb-2 text-[24px] leading-[24px] font-bold">
-            Salmon poke bowl
+            {billData.bowlName}
           </h1>
-          <span>Medium size</span>
-          <span>White rice base</span>
-          <span>Ginger sauce</span>
+          <span>{billData.sizeName} size</span>
+          <span>{billData.baseName} base</span>
+          <span>{billData.sauceName} sauce</span>
           <div>
             <h2>Added ingredients:</h2>
             <div className="ingredientsList flex flex-col ml-2 mt-[2px]">
-              <span>Edamame</span>
-              <span>Spring Onion</span>
-              <span>Shallots</span>
-              <span>Beets</span>
-              <span>Cucumber</span>
-              <span>Kohlrabi</span>
-              <span>Nori algae</span>
+              {billData.ingredients.map((ingredient) => {
+                return <span>{ingredient.name}</span>;
+              })}
             </div>
           </div>
           <div className="extraIngrediensList flex flex-col gap-y-[13px]">
-            <span>Wakame algae</span>
-            <span>Salmon +50g</span>
+            {extraIngredients.map((extraIngredient) => {
+              return <span>{extraIngredient.name}</span>;
+            })}
           </div>
         </div>
         <div className="rightSide flex flex-col justify-between items-end text-[24px] leading-[24px] font-bold">
@@ -50,8 +47,8 @@ const Bill = () => {
         <div className="buttons flex flex-row justify-between">
           <Button
             className="border-[#292838] bg-white px-9 flex-row-reverse gap-5 text-[#292838] "
-            type="submit"
             label="Go to checkout"
+            type="submit"
           />
           <Button
             className="border-[#292838] bg-[#292838] px-9 flex-row-reverse gap-5 text-white "
